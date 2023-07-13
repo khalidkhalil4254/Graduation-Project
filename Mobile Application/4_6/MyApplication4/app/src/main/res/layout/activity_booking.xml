@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    tools:context=".booking">
+
+    <ImageView
+        android:id="@+id/img_second"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/p1" />
+
+    <TextView
+        android:id="@+id/tv_title_secondActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="pizza1"
+        android:textSize="45sp"
+        app:layout_constraintStart_toStartOf="@+id/img_second"
+        app:layout_constraintTop_toBottomOf="@+id/img_second" />
+
+    <TextView
+        android:id="@+id/tv_ing_secondActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textSize="35sp"
+        android:text="ingredients"
+        app:layout_constraintStart_toStartOf="@+id/tv_title_secondActivity"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title_secondActivity" />
+
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/book_now"
+        android:layout_width="846dp"
+        android:layout_height="285dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/book_now" />
+</androidx.constraintlayout.widget.ConstraintLayout>

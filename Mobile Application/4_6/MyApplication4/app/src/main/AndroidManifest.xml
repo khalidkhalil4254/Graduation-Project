@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- permissions for INTERNET -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyApplication"
+        tools:targetApi="31">
+        <activity
+            android:name=".Home_page"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".session_info"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".cp_application_form"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".QRcode_gen"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".Speakers_etisalat"
+            android:exported="false" />
+        <activity
+            android:name=".LightingControl"
+            android:exported="false" />
+        <activity
+            android:name=".Speakers_ibm"
+            android:exported="false" />
+        <activity
+            android:name=".VIP_visitor"
+            android:exported="false" />
+        <activity
+            android:name=".Control"
+            android:exported="false" />
+        <activity
+            android:name=".SignUp_other"
+            android:exported="false" />
+        <activity
+            android:name=".b_signup"
+            android:exported="false" />
+        <activity
+            android:name=".contracts_companies"
+            android:exported="false" />
+        <activity
+            android:name=".protocols_campanies"
+            android:exported="false" />
+        <activity
+            android:name=".Get_started"
+            android:exported="false" />
+        <activity
+            android:name=".companies2"
+            android:exported="false" />
+        <activity
+            android:name=".booking"
+            android:exported="false" />
+        <activity
+            android:name=".Speakers_voda"
+            android:exported="false" />
+        <activity
+            android:name=".profile"
+            android:exported="false" />
+        <activity
+            android:name=".companies"
+            android:exported="false" />
+        <activity
+            android:name=".Register_Form"
+            android:exported="false" />
+        <activity
+            android:name=".SignUp"
+            android:exported="false" />
+        <activity
+            android:name=".Login"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity2"
+            android:exported="false" />
+        <activity
+            android:name=".Splash_Screen"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#FFFFFF"
+    tools:context=".cp_application_form">
+
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal"
+            android:padding="24dp"
+            android:background="#FFFFFF">
+
+            <ImageView
+
+                android:id="@+id/imgget"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:fontFamily="@font/cakecafe"
+                android:text="Required information"
+                android:textAlignment="center"
+                android:textColor="#4F2A91"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:textColorHint="@color/lavender"
+                android:fontFamily="@font/cakecafe"
+                android:id="@+id/email_req_cp"
+                android:background="@drawable/custom_edittext"
+                android:layout_marginTop="40dp"
+                android:padding="8dp"
+                android:hint="E-mail"
+
+                android:textColor="@color/black"
+                android:drawablePadding="8dp"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:id="@+id/id_signup_other_phone"
+                android:textColorHint="@color/lavender"
+                android:fontFamily="@font/cakecafe"
+                android:background="@drawable/custom_edittext"
+                android:layout_marginTop="20dp"
+                android:padding="8dp"
+                android:hint="Enter Your Phone number "
+                android:inputType="number"
+                android:textColor="@color/black"
+                android:drawablePadding="8dp"/>
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="2dp"
+                android:textSize="20sp"
+                android:textColor="@color/lavender"
+                android:fontFamily="@font/cakecafe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description : " />
+
+            <EditText
+                android:id="@+id/id_signup_des"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="2dp"
+                android:background="@drawable/custom_edittext3"
+                android:clickable="true"
+                android:fontFamily="@font/cakecafe"
+                android:hint="Enter Your description here "
+                android:inputType="text"
+                android:paddingTop="0dp"
+                android:singleLine="false"
+                android:textAlignment="gravity"
+                android:textColor="@color/black"
+                android:textColorHint="@color/lavender"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/finish_btn"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#4F2A91"
+                android:fontFamily="@font/cakecafe"
+                android:text="Confirm"
+                android:textSize="18sp"
+                app:cornerRadius="20dp"
+                android:layout_margin="10dp"/>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+
+</LinearLayout>
