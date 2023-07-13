@@ -1,0 +1,13 @@
+service: IoT-SES-EmailsRestApi
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+functions:
+  mailer:
+    handler: createEmail.handler
+    description: Lambda function to auto send emails and email templates.
+    events:
+      - http:
+          path: /api/v0/emails/send
+          method: POST

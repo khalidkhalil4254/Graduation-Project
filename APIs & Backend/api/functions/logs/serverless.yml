@@ -1,0 +1,53 @@
+
+#------------------Common_configuration(Start)------------------
+#naming the service under lambda on AWS console:
+service: IoT-SES-LogsRestApi
+
+#about provider name & runtime envrinment:
+provider:
+  name: aws
+  region: us-east-1
+  runtime: nodejs14.x
+
+
+#------------------Common_configuration(End)---------------------
+#identifying the functions existed on restApi:
+functions:
+  #---------------------------------logs-microservice---------------------------------
+  craeteLogs:
+      handler: createLog.handler
+      description: lambda to create a new log information with timestamp for each record!
+      events:
+      - httpApi: 
+          path: /api/v0/logs/create
+          method: POST
+
+
+  readLogs:
+      handler: readLog.handler
+      description: lambda to read a log information with its timestamp!
+      events:
+      - httpApi: 
+          path: /api/v0/logs/read
+          method: GET
+
+      
+  deleteLogs:
+      handler: deleteLog.handler
+      description: lambda to delete existing log information!
+      events:
+      - httpApi: 
+          path: /api/v0/logs/delete
+          method: DELETE
+
+
+  #---------------------------------restApi-safety---------------------------------
+
+  #An endpoint to ensure that the restApi is working fine:
+  heartBeats:
+      handler: index.handler
+      description: lambda to ensure that everything is ok!
+      events:
+      - httpApi: 
+          path: /api/v0/logs
+          method: GET

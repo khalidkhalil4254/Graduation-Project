@@ -1,0 +1,86 @@
+#defining service:
+service: IoT-SES-SessionsRestApi
+#defining Cloud service provider:
+provider:
+  name: aws
+  runtime: nodejs14.x #nodejs runtime environment
+  region: us-east-1 #deployment region
+
+
+#defining functionlities of this service:
+functions:
+  #function to create new session:
+  createSession:
+    handler: createSession.handler
+    description: lambda function to create a new session in database.
+    events:
+    - httpApi:
+        path: /api/v0/sessions/create
+        method: POST
+
+
+  #registerByEmail:
+  registerByEmail:
+    handler: registerByEmail.handler
+    description: lambda function to create a new registeration using mobile App.
+    events:
+    - httpApi:
+        path: /api/v1/sessions/registerationCreate
+        method: POST
+
+  #checkSeats:
+  checkSeats:
+    handler: checkSeats.handler
+    description: lambda function to read number of registered users for mobile app.
+    events:
+    - httpApi:
+        path: /api/v1/sessions/checkSeats
+        method: GET
+  
+
+  #function to read all sessions from database:
+  readSession:
+    handler: readSession.handler
+    description: lambda function to read sessions.
+    events:
+    - httpApi:
+        path: /api/v0/sessions/read
+        method: GET
+  #getCountByCompany:
+  getCountByCompany:
+    handler: getCountByCompany.handler
+    description: lambda to function to get number of consumed seats of each company for mobile application!
+    events:
+      - httpApi:
+          path: /api/v1/sessions/getCountByCompany
+          method: GET
+
+
+
+  #function to update specific session or an existing one:
+  updateSession:
+    handler: updateSession.handler
+    description: lambda fucntion to update existing session details.
+    events:
+    - httpApi:
+        path: /api/v0/sessions/update 
+        method: PUT
+
+  #function to delete an existing session:
+  deleteSession:
+    handler: deleteSession.handler
+    description: lambda function to delete an existing session.
+    events:
+    - httpApi:
+        path: /api/v0/sessions/delete
+        method: DELETE
+
+
+  #defining lambda funcntion to verifying that this service is working or not:
+  heartBeatSession:
+    handler: index.handler
+    description: lambda function for determining that the service is working perfectly.
+    events:
+    - httpApi:
+        path: /api/v0/sessions
+        method: GET

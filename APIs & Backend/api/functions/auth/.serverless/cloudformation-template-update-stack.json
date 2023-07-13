@@ -1,0 +1,1487 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "The AWS CloudFormation template for this Serverless application",
+  "Resources": {
+    "ServerlessDeploymentBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ServerlessDeploymentBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "CraeteAuthLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-craeteAuth"
+      }
+    },
+    "CreateAuthMobileLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-createAuthMobile"
+      }
+    },
+    "ReadAuthLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-readAuth"
+      }
+    },
+    "ReadAuthMobileLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-readAuthMobile"
+      }
+    },
+    "GetAuthByIdLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-getAuthById"
+      }
+    },
+    "GetIdByUserAndPasswordLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-getIdByUserAndPassword"
+      }
+    },
+    "GetIdByEmailLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-getIdByEmail"
+      }
+    },
+    "UpdateAuthLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-updateAuth"
+      }
+    },
+    "DeleteAuthLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-deleteAuth"
+      }
+    },
+    "HeartBeatsLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/IoT-SES-AuthRestApi-dev-heartBeats"
+      }
+    },
+    "IamRoleLambdaExecution": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "IoT-SES-AuthRestApi",
+                  "dev",
+                  "lambda"
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:CreateLogGroup",
+                    "logs:TagResource"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/IoT-SES-AuthRestApi-dev*:*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/IoT-SES-AuthRestApi-dev*:*:*"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              "IoT-SES-AuthRestApi",
+              "dev",
+              {
+                "Ref": "AWS::Region"
+              },
+              "lambdaRole"
+            ]
+          ]
+        }
+      }
+    },
+    "CraeteAuthLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "createAuth.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-craeteAuth",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to create a new Authentication!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "CraeteAuthLogGroup"
+      ]
+    },
+    "CreateAuthMobileLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "createAuthMobile.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-createAuthMobile",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to create a new Authentication using mobile application!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "CreateAuthMobileLogGroup"
+      ]
+    },
+    "ReadAuthLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "readAuth.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-readAuth",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to get Authentication from database!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "ReadAuthLogGroup"
+      ]
+    },
+    "ReadAuthMobileLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "readAuthMobile.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-readAuthMobile",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to get Authentication from database optimized for mobile application!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "ReadAuthMobileLogGroup"
+      ]
+    },
+    "GetAuthByIdLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "getAuthById.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-getAuthById",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda function to get authentication by ID for QRCODE module!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "GetAuthByIdLogGroup"
+      ]
+    },
+    "GetIdByUserAndPasswordLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "getIdByUserAndPss.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-getIdByUserAndPassword",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to get Authentication ID by user & password from database optimized for mobile application!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "GetIdByUserAndPasswordLogGroup"
+      ]
+    },
+    "GetIdByEmailLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "getIdByEmail.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-getIdByEmail",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to get Authentication ID by EMAIL for generating QRCODE in mobile application!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "GetIdByEmailLogGroup"
+      ]
+    },
+    "UpdateAuthLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "updateAuth.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-updateAuth",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to update Authentication in database!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "UpdateAuthLogGroup"
+      ]
+    },
+    "DeleteAuthLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "readAuth.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-deleteAuth",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to delete Authentication from database!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "DeleteAuthLogGroup"
+      ]
+    },
+    "HeartBeatsLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/IoT-SES-AuthRestApi/dev/1688859833965-2023-07-08T23:43:53.965Z/IoT-SES-AuthRestApi.zip"
+        },
+        "Handler": "index.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "IoT-SES-AuthRestApi-dev-heartBeats",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Description": "lambda to ensure that everything is ok!",
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "HeartBeatsLogGroup"
+      ]
+    },
+    "CraeteAuthLambdaVersion7AFS6X9FezCLrQwpqNX923bIlWIfe0W6GOkMGVTVo": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "CraeteAuthLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to create a new Authentication!"
+      }
+    },
+    "CreateAuthMobileLambdaVersion9KO8h5rT1YrksJAG17h5pIZdBFfsIlvvBleyVNAw": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "CreateAuthMobileLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to create a new Authentication using mobile application!"
+      }
+    },
+    "ReadAuthLambdaVersionfQhf0dEP1SVLwgaa552FrFdiP7ItReUmpTcDh4o3EA": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ReadAuthLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to get Authentication from database!"
+      }
+    },
+    "ReadAuthMobileLambdaVersionONaDAZd0RKHw1DBSsBNjdwqI5MUthjvwpwEdzwrY": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ReadAuthMobileLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to get Authentication from database optimized for mobile application!"
+      }
+    },
+    "GetAuthByIdLambdaVersionvz0w2HS8ByXphQxxQqUd9SDMSHd1yk60LhnKPlUaw": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GetAuthByIdLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda function to get authentication by ID for QRCODE module!"
+      }
+    },
+    "GetIdByUserAndPasswordLambdaVersionSlS1q2LFPphVhCW45ILSWWwnQXRcPxc0y91K7NuLU": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GetIdByUserAndPasswordLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to get Authentication ID by user & password from database optimized for mobile application!"
+      }
+    },
+    "GetIdByEmailLambdaVersionagD4dORgnw5L6TS7mFFPPcztrNJRpzwI6Rxro12hKY": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GetIdByEmailLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to get Authentication ID by EMAIL for generating QRCODE in mobile application!"
+      }
+    },
+    "UpdateAuthLambdaVersionkJwlzoBVQRHwbpvx6HVtG51D6EWC8dtqa47CU7CsJk": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "UpdateAuthLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to update Authentication in database!"
+      }
+    },
+    "DeleteAuthLambdaVersionGiQq94L9ZqYWIEXDNg4aRMrWq2KV0XZwZkE950BZ5c": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "DeleteAuthLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to delete Authentication from database!"
+      }
+    },
+    "HeartBeatsLambdaVersionSXVHLwdE1bze3NK3JUDFRfMsnoQP3aozIrTRSVpM8": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "HeartBeatsLambdaFunction"
+        },
+        "CodeSha256": "frTanaNBRN9pql+vkUpYXAa+ycvF5RbtJgRFLWNP3X0=",
+        "Description": "lambda to ensure that everything is ok!"
+      }
+    },
+    "HttpApi": {
+      "Type": "AWS::ApiGatewayV2::Api",
+      "Properties": {
+        "Name": "dev-IoT-SES-AuthRestApi",
+        "ProtocolType": "HTTP"
+      }
+    },
+    "HttpApiStage": {
+      "Type": "AWS::ApiGatewayV2::Stage",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "StageName": "$default",
+        "AutoDeploy": true,
+        "DefaultRouteSettings": {
+          "DetailedMetricsEnabled": false
+        }
+      }
+    },
+    "CraeteAuthLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CraeteAuthLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationCraeteAuth": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "CraeteAuthLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRoutePostApiV0AuthCreate": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/v0/auth/create",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationCraeteAuth"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationCraeteAuth"
+    },
+    "CreateAuthMobileLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CreateAuthMobileLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationCreateAuthMobile": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "CreateAuthMobileLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRoutePostApiV1AuthCreate": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/v1/auth/create",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationCreateAuthMobile"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationCreateAuthMobile"
+    },
+    "ReadAuthLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "ReadAuthLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationReadAuth": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "ReadAuthLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRouteGetApiV0AuthRead": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/v0/auth/read",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationReadAuth"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationReadAuth"
+    },
+    "ReadAuthMobileLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "ReadAuthMobileLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationReadAuthMobile": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "ReadAuthMobileLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRouteGetApiV1AuthRead": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/v1/auth/read",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationReadAuthMobile"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationReadAuthMobile"
+    },
+    "GetAuthByIdLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "GetAuthByIdLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationGetAuthById": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "GetAuthByIdLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRouteGetApiV0AuthGetauthbyid": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/v0/auth/getAuthById",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationGetAuthById"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationGetAuthById"
+    },
+    "GetIdByUserAndPasswordLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "GetIdByUserAndPasswordLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationGetIdByUserAndPassword": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "GetIdByUserAndPasswordLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRouteGetApiV1AuthGetidbyuserandpassword": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/v1/auth/getIdByUserAndPassword",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationGetIdByUserAndPassword"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationGetIdByUserAndPassword"
+    },
+    "GetIdByEmailLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "GetIdByEmailLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationGetIdByEmail": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "GetIdByEmailLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRouteGetApiV1AuthGetidbyemail": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/v1/auth/getIdByEmail",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationGetIdByEmail"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationGetIdByEmail"
+    },
+    "UpdateAuthLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "UpdateAuthLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationUpdateAuth": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "UpdateAuthLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRoutePutApiV0AuthUpdate": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "PUT /api/v0/auth/update",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationUpdateAuth"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationUpdateAuth"
+    },
+    "DeleteAuthLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "DeleteAuthLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationDeleteAuth": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "DeleteAuthLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRouteDeleteApiV0AuthDelete": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "DELETE /api/v0/auth/delete",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationDeleteAuth"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationDeleteAuth"
+    },
+    "HeartBeatsLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "HeartBeatsLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationHeartBeats": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "HeartBeatsLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRouteGetApiV0Auth": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/v0/auth",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationHeartBeats"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationHeartBeats"
+    }
+  },
+  "Outputs": {
+    "ServerlessDeploymentBucketName": {
+      "Value": {
+        "Ref": "ServerlessDeploymentBucket"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-ServerlessDeploymentBucketName"
+      }
+    },
+    "CraeteAuthLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "CraeteAuthLambdaVersion7AFS6X9FezCLrQwpqNX923bIlWIfe0W6GOkMGVTVo"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-CraeteAuthLambdaFunctionQualifiedArn"
+      }
+    },
+    "CreateAuthMobileLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "CreateAuthMobileLambdaVersion9KO8h5rT1YrksJAG17h5pIZdBFfsIlvvBleyVNAw"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-CreateAuthMobileLambdaFunctionQualifiedArn"
+      }
+    },
+    "ReadAuthLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "ReadAuthLambdaVersionfQhf0dEP1SVLwgaa552FrFdiP7ItReUmpTcDh4o3EA"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-ReadAuthLambdaFunctionQualifiedArn"
+      }
+    },
+    "ReadAuthMobileLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "ReadAuthMobileLambdaVersionONaDAZd0RKHw1DBSsBNjdwqI5MUthjvwpwEdzwrY"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-ReadAuthMobileLambdaFunctionQualifiedArn"
+      }
+    },
+    "GetAuthByIdLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GetAuthByIdLambdaVersionvz0w2HS8ByXphQxxQqUd9SDMSHd1yk60LhnKPlUaw"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-GetAuthByIdLambdaFunctionQualifiedArn"
+      }
+    },
+    "GetIdByUserAndPasswordLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GetIdByUserAndPasswordLambdaVersionSlS1q2LFPphVhCW45ILSWWwnQXRcPxc0y91K7NuLU"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-GetIdByUserAndPasswordLambdaFunctionQualifiedArn"
+      }
+    },
+    "GetIdByEmailLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GetIdByEmailLambdaVersionagD4dORgnw5L6TS7mFFPPcztrNJRpzwI6Rxro12hKY"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-GetIdByEmailLambdaFunctionQualifiedArn"
+      }
+    },
+    "UpdateAuthLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "UpdateAuthLambdaVersionkJwlzoBVQRHwbpvx6HVtG51D6EWC8dtqa47CU7CsJk"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-UpdateAuthLambdaFunctionQualifiedArn"
+      }
+    },
+    "DeleteAuthLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "DeleteAuthLambdaVersionGiQq94L9ZqYWIEXDNg4aRMrWq2KV0XZwZkE950BZ5c"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-DeleteAuthLambdaFunctionQualifiedArn"
+      }
+    },
+    "HeartBeatsLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "HeartBeatsLambdaVersionSXVHLwdE1bze3NK3JUDFRfMsnoQP3aozIrTRSVpM8"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-HeartBeatsLambdaFunctionQualifiedArn"
+      }
+    },
+    "HttpApiId": {
+      "Description": "Id of the HTTP API",
+      "Value": {
+        "Ref": "HttpApi"
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-HttpApiId"
+      }
+    },
+    "HttpApiUrl": {
+      "Description": "URL of the HTTP API",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "HttpApi"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            }
+          ]
+        ]
+      },
+      "Export": {
+        "Name": "sls-IoT-SES-AuthRestApi-dev-HttpApiUrl"
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+#Monolith archetecture based configuration file that include all microservices configurations:
+#------------------Common_configuration(Start)------------------
+#naming the service under lambda on AWS console:
+service: serverless-iot-rest-api
+
+#about provider name & runtime envrinment:
+provider:
+  name: aws
+  region: us-east-1
+  runtime: nodejs14.x
+
+#------------------Common_configuration(End)---------------------
+
+
+#identifying the functions existed on restApi:
+functions:
+  #---------------------------------users-microservice---------------------------------
+  craeteUsers:
+      handler: functions/users/createUser.handler
+      description: lambda to create a new user!
+      events:
+      - httpApi: 
+          path: /api/v0/users/create
+          method: POST
+
+
+  readUsers:
+    handler: functions/users/readUser.handler
+    description: lambda to get all usera from database!
+    events:
+      - httpApi: 
+          path: /api/v0/users/read
+          method: GET
+
+
+  #---------------------------------logs-microservice---------------------------------
+  craeteLogs:
+      handler: functions/logs/createLog.handler
+      description: lambda to create a new log information with timestamp for each record!
+      events:
+      - httpApi: 
+          path: /api/v0/logs/create
+          method: POST
+
+
+  readLogs:
+      handler: functions/logs/readLog.handler
+      description: lambda to read a log information with its timestamp!
+      events:
+      - httpApi: 
+          path: /api/v0/logs/read
+          method: GET
+      
+  #---------------------------------restApi-safety---------------------------------
+
+  #An endpoint to ensure that the restApi is working fine:
+  heartBeats:
+      handler: index.handler
+      description: lambda to ensure that everything is ok!
+      events:
+      - httpApi: 
+          path: /api/v0
+          method: GET

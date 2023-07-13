@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "mysql": "^2.18.1"
+  },
+  "name": "IOT-API",
+  "version": "1.8.2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kalidkalil4254@gmail.com",
+  "license": "ISC",
+  "description": "This Serverless based API is considered as an API for an Internet of Things (IoT) Project that involves using Access control methods such as RFID & QRCODE for internal and external security and entrances for any building such as organization or Exhibitions even your home using HTTPS that using end to end encryption in IOT devices we use to determine that no eavesdropping or man in the middle attack (MITMA) to ensure that the IOT devices secured as possible!"
+}

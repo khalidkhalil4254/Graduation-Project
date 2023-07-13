@@ -1,0 +1,1496 @@
+{
+  "service": {
+    "service": "IoT-SES-SessionsRestApi",
+    "serviceObject": {
+      "name": "IoT-SES-SessionsRestApi"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs14.x",
+      "region": "us-east-1",
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketEncryption": {
+                "ServerSideEncryptionConfiguration": [
+                  {
+                    "ServerSideEncryptionByDefault": {
+                      "SSEAlgorithm": "AES256"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "s3:*",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "CreateSessionLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/IoT-SES-SessionsRestApi-dev-createSession"
+            }
+          },
+          "RegisterByEmailLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/IoT-SES-SessionsRestApi-dev-registerByEmail"
+            }
+          },
+          "CheckSeatsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/IoT-SES-SessionsRestApi-dev-checkSeats"
+            }
+          },
+          "ReadSessionLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/IoT-SES-SessionsRestApi-dev-readSession"
+            }
+          },
+          "GetCountByCompanyLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/IoT-SES-SessionsRestApi-dev-getCountByCompany"
+            }
+          },
+          "UpdateSessionLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/IoT-SES-SessionsRestApi-dev-updateSession"
+            }
+          },
+          "DeleteSessionLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/IoT-SES-SessionsRestApi-dev-deleteSession"
+            }
+          },
+          "HeartBeatSessionLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/IoT-SES-SessionsRestApi-dev-heartBeatSession"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "IoT-SES-SessionsRestApi",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/IoT-SES-SessionsRestApi-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/IoT-SES-SessionsRestApi-dev*:*:*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "IoT-SES-SessionsRestApi",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "CreateSessionLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z/IoT-SES-SessionsRestApi.zip"
+              },
+              "Handler": "createSession.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "IoT-SES-SessionsRestApi-dev-createSession",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Description": "lambda function to create a new session in database.",
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CreateSessionLogGroup"
+            ]
+          },
+          "RegisterByEmailLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z/IoT-SES-SessionsRestApi.zip"
+              },
+              "Handler": "registerByEmail.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "IoT-SES-SessionsRestApi-dev-registerByEmail",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Description": "lambda function to create a new registeration using mobile App.",
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "RegisterByEmailLogGroup"
+            ]
+          },
+          "CheckSeatsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z/IoT-SES-SessionsRestApi.zip"
+              },
+              "Handler": "checkSeats.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "IoT-SES-SessionsRestApi-dev-checkSeats",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Description": "lambda function to read number of registered users for mobile app.",
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CheckSeatsLogGroup"
+            ]
+          },
+          "ReadSessionLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z/IoT-SES-SessionsRestApi.zip"
+              },
+              "Handler": "readSession.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "IoT-SES-SessionsRestApi-dev-readSession",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Description": "lambda function to read sessions.",
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ReadSessionLogGroup"
+            ]
+          },
+          "GetCountByCompanyLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z/IoT-SES-SessionsRestApi.zip"
+              },
+              "Handler": "getCountByCompany.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "IoT-SES-SessionsRestApi-dev-getCountByCompany",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Description": "lambda to function to get number of consumed seats of each company for mobile application!",
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GetCountByCompanyLogGroup"
+            ]
+          },
+          "UpdateSessionLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z/IoT-SES-SessionsRestApi.zip"
+              },
+              "Handler": "updateSession.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "IoT-SES-SessionsRestApi-dev-updateSession",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Description": "lambda fucntion to update existing session details.",
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "UpdateSessionLogGroup"
+            ]
+          },
+          "DeleteSessionLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z/IoT-SES-SessionsRestApi.zip"
+              },
+              "Handler": "deleteSession.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "IoT-SES-SessionsRestApi-dev-deleteSession",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Description": "lambda function to delete an existing session.",
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "DeleteSessionLogGroup"
+            ]
+          },
+          "HeartBeatSessionLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z/IoT-SES-SessionsRestApi.zip"
+              },
+              "Handler": "index.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "IoT-SES-SessionsRestApi-dev-heartBeatSession",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Description": "lambda function for determining that the service is working perfectly.",
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "HeartBeatSessionLogGroup"
+            ]
+          },
+          "CreateSessionLambdaVersionGFwj1VXfiuwPhzZAnUnY4kZzhLE8wpm9O9738b0ZQ": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateSessionLambdaFunction"
+              },
+              "CodeSha256": "Vd6qPVZgiM+1t9fIADawMiAx3MBsPv0wDdbkgCoFi6M=",
+              "Description": "lambda function to create a new session in database."
+            }
+          },
+          "RegisterByEmailLambdaVersionbFJexQUrfhuWa3vytvDwylWYn57PE2tH3zytvksKWlg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "RegisterByEmailLambdaFunction"
+              },
+              "CodeSha256": "Vd6qPVZgiM+1t9fIADawMiAx3MBsPv0wDdbkgCoFi6M=",
+              "Description": "lambda function to create a new registeration using mobile App."
+            }
+          },
+          "CheckSeatsLambdaVersion6Nh02dUeXqKmuTgbhldmfMKOH0ObrWI7ZCB6LZvWInc": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CheckSeatsLambdaFunction"
+              },
+              "CodeSha256": "Vd6qPVZgiM+1t9fIADawMiAx3MBsPv0wDdbkgCoFi6M=",
+              "Description": "lambda function to read number of registered users for mobile app."
+            }
+          },
+          "ReadSessionLambdaVersionDvtCkcQOCqNrlCwz6tU0risKOLypzgReWeSKpCfPiA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ReadSessionLambdaFunction"
+              },
+              "CodeSha256": "Vd6qPVZgiM+1t9fIADawMiAx3MBsPv0wDdbkgCoFi6M=",
+              "Description": "lambda function to read sessions."
+            }
+          },
+          "GetCountByCompanyLambdaVersionEF79Fan3CypfgjIdP4ZH5dx0QIZgE5jiZgl76a5ObYQ": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetCountByCompanyLambdaFunction"
+              },
+              "CodeSha256": "Vd6qPVZgiM+1t9fIADawMiAx3MBsPv0wDdbkgCoFi6M=",
+              "Description": "lambda to function to get number of consumed seats of each company for mobile application!"
+            }
+          },
+          "UpdateSessionLambdaVersioncq78AkRAemmdFBcSG2UwkmToyHgDHGigIW6cTC7iI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "UpdateSessionLambdaFunction"
+              },
+              "CodeSha256": "Vd6qPVZgiM+1t9fIADawMiAx3MBsPv0wDdbkgCoFi6M=",
+              "Description": "lambda fucntion to update existing session details."
+            }
+          },
+          "DeleteSessionLambdaVersion9lyoaI6EgRK4beDPbVWNdx2pC2pLcJfxl58Lo3Ek": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "DeleteSessionLambdaFunction"
+              },
+              "CodeSha256": "Vd6qPVZgiM+1t9fIADawMiAx3MBsPv0wDdbkgCoFi6M=",
+              "Description": "lambda function to delete an existing session."
+            }
+          },
+          "HeartBeatSessionLambdaVersionP6KIZgMqItqovGXojwXmDUAKfUr2WnqMnXwcKY2nRc": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "HeartBeatSessionLambdaFunction"
+              },
+              "CodeSha256": "Vd6qPVZgiM+1t9fIADawMiAx3MBsPv0wDdbkgCoFi6M=",
+              "Description": "lambda function for determining that the service is working perfectly."
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-IoT-SES-SessionsRestApi",
+              "ProtocolType": "HTTP"
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "CreateSessionLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CreateSessionLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationCreateSession": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CreateSessionLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostApiV0SessionsCreate": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /api/v0/sessions/create",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationCreateSession"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationCreateSession"
+          },
+          "RegisterByEmailLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "RegisterByEmailLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationRegisterByEmail": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"RegisterByEmailLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostApiV1SessionsRegisterationcreate": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /api/v1/sessions/registerationCreate",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationRegisterByEmail"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationRegisterByEmail"
+          },
+          "CheckSeatsLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CheckSeatsLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationCheckSeats": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CheckSeatsLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteGetApiV1SessionsCheckseats": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "GET /api/v1/sessions/checkSeats",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationCheckSeats"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationCheckSeats"
+          },
+          "ReadSessionLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ReadSessionLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationReadSession": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"ReadSessionLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteGetApiV0SessionsRead": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "GET /api/v0/sessions/read",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationReadSession"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationReadSession"
+          },
+          "GetCountByCompanyLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetCountByCompanyLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationGetCountByCompany": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetCountByCompanyLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteGetApiV1SessionsGetcountbycompany": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "GET /api/v1/sessions/getCountByCompany",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationGetCountByCompany"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationGetCountByCompany"
+          },
+          "UpdateSessionLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "UpdateSessionLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationUpdateSession": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"UpdateSessionLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePutApiV0SessionsUpdate": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "PUT /api/v0/sessions/update",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationUpdateSession"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationUpdateSession"
+          },
+          "DeleteSessionLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "DeleteSessionLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationDeleteSession": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"DeleteSessionLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteDeleteApiV0SessionsDelete": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "DELETE /api/v0/sessions/delete",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationDeleteSession"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationDeleteSession"
+          },
+          "HeartBeatSessionLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "HeartBeatSessionLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationHeartBeatSession": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"HeartBeatSessionLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteGetApiV0Sessions": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "GET /api/v0/sessions",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationHeartBeatSession"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationHeartBeatSession"
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "CreateSessionLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateSessionLambdaVersionGFwj1VXfiuwPhzZAnUnY4kZzhLE8wpm9O9738b0ZQ"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-CreateSessionLambdaFunctionQualifiedArn"
+            }
+          },
+          "RegisterByEmailLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "RegisterByEmailLambdaVersionbFJexQUrfhuWa3vytvDwylWYn57PE2tH3zytvksKWlg"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-RegisterByEmailLambdaFunctionQualifiedArn"
+            }
+          },
+          "CheckSeatsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CheckSeatsLambdaVersion6Nh02dUeXqKmuTgbhldmfMKOH0ObrWI7ZCB6LZvWInc"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-CheckSeatsLambdaFunctionQualifiedArn"
+            }
+          },
+          "ReadSessionLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ReadSessionLambdaVersionDvtCkcQOCqNrlCwz6tU0risKOLypzgReWeSKpCfPiA"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-ReadSessionLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetCountByCompanyLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetCountByCompanyLambdaVersionEF79Fan3CypfgjIdP4ZH5dx0QIZgE5jiZgl76a5ObYQ"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-GetCountByCompanyLambdaFunctionQualifiedArn"
+            }
+          },
+          "UpdateSessionLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "UpdateSessionLambdaVersioncq78AkRAemmdFBcSG2UwkmToyHgDHGigIW6cTC7iI"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-UpdateSessionLambdaFunctionQualifiedArn"
+            }
+          },
+          "DeleteSessionLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "DeleteSessionLambdaVersion9lyoaI6EgRK4beDPbVWNdx2pC2pLcJfxl58Lo3Ek"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-DeleteSessionLambdaFunctionQualifiedArn"
+            }
+          },
+          "HeartBeatSessionLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "HeartBeatSessionLambdaVersionP6KIZgMqItqovGXojwXmDUAKfUr2WnqMnXwcKY2nRc"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-HeartBeatSessionLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-IoT-SES-SessionsRestApi-dev-HttpApiUrl"
+            }
+          }
+        }
+      },
+      "coreCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketEncryption": {
+                "ServerSideEncryptionConfiguration": [
+                  {
+                    "ServerSideEncryptionByDefault": {
+                      "SSEAlgorithm": "AES256"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "s3:*",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "pluginsData": {},
+    "functions": {
+      "createSession": {
+        "handler": "createSession.handler",
+        "description": "lambda function to create a new session in database.",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/api/v0/sessions/create",
+              "method": "POST"
+            },
+            "resolvedMethod": "POST",
+            "resolvedPath": "/api/v0/sessions/create"
+          }
+        ],
+        "name": "IoT-SES-SessionsRestApi-dev-createSession",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs14.x",
+        "vpc": {},
+        "versionLogicalId": "CreateSessionLambdaVersionGFwj1VXfiuwPhzZAnUnY4kZzhLE8wpm9O9738b0ZQ"
+      },
+      "registerByEmail": {
+        "handler": "registerByEmail.handler",
+        "description": "lambda function to create a new registeration using mobile App.",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/api/v1/sessions/registerationCreate",
+              "method": "POST"
+            },
+            "resolvedMethod": "POST",
+            "resolvedPath": "/api/v1/sessions/registerationCreate"
+          }
+        ],
+        "name": "IoT-SES-SessionsRestApi-dev-registerByEmail",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs14.x",
+        "vpc": {},
+        "versionLogicalId": "RegisterByEmailLambdaVersionbFJexQUrfhuWa3vytvDwylWYn57PE2tH3zytvksKWlg"
+      },
+      "checkSeats": {
+        "handler": "checkSeats.handler",
+        "description": "lambda function to read number of registered users for mobile app.",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/api/v1/sessions/checkSeats",
+              "method": "GET"
+            },
+            "resolvedMethod": "GET",
+            "resolvedPath": "/api/v1/sessions/checkSeats"
+          }
+        ],
+        "name": "IoT-SES-SessionsRestApi-dev-checkSeats",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs14.x",
+        "vpc": {},
+        "versionLogicalId": "CheckSeatsLambdaVersion6Nh02dUeXqKmuTgbhldmfMKOH0ObrWI7ZCB6LZvWInc"
+      },
+      "readSession": {
+        "handler": "readSession.handler",
+        "description": "lambda function to read sessions.",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/api/v0/sessions/read",
+              "method": "GET"
+            },
+            "resolvedMethod": "GET",
+            "resolvedPath": "/api/v0/sessions/read"
+          }
+        ],
+        "name": "IoT-SES-SessionsRestApi-dev-readSession",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs14.x",
+        "vpc": {},
+        "versionLogicalId": "ReadSessionLambdaVersionDvtCkcQOCqNrlCwz6tU0risKOLypzgReWeSKpCfPiA"
+      },
+      "getCountByCompany": {
+        "handler": "getCountByCompany.handler",
+        "description": "lambda to function to get number of consumed seats of each company for mobile application!",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/api/v1/sessions/getCountByCompany",
+              "method": "GET"
+            },
+            "resolvedMethod": "GET",
+            "resolvedPath": "/api/v1/sessions/getCountByCompany"
+          }
+        ],
+        "name": "IoT-SES-SessionsRestApi-dev-getCountByCompany",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs14.x",
+        "vpc": {},
+        "versionLogicalId": "GetCountByCompanyLambdaVersionEF79Fan3CypfgjIdP4ZH5dx0QIZgE5jiZgl76a5ObYQ"
+      },
+      "updateSession": {
+        "handler": "updateSession.handler",
+        "description": "lambda fucntion to update existing session details.",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/api/v0/sessions/update",
+              "method": "PUT"
+            },
+            "resolvedMethod": "PUT",
+            "resolvedPath": "/api/v0/sessions/update"
+          }
+        ],
+        "name": "IoT-SES-SessionsRestApi-dev-updateSession",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs14.x",
+        "vpc": {},
+        "versionLogicalId": "UpdateSessionLambdaVersioncq78AkRAemmdFBcSG2UwkmToyHgDHGigIW6cTC7iI"
+      },
+      "deleteSession": {
+        "handler": "deleteSession.handler",
+        "description": "lambda function to delete an existing session.",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/api/v0/sessions/delete",
+              "method": "DELETE"
+            },
+            "resolvedMethod": "DELETE",
+            "resolvedPath": "/api/v0/sessions/delete"
+          }
+        ],
+        "name": "IoT-SES-SessionsRestApi-dev-deleteSession",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs14.x",
+        "vpc": {},
+        "versionLogicalId": "DeleteSessionLambdaVersion9lyoaI6EgRK4beDPbVWNdx2pC2pLcJfxl58Lo3Ek"
+      },
+      "heartBeatSession": {
+        "handler": "index.handler",
+        "description": "lambda function for determining that the service is working perfectly.",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/api/v0/sessions",
+              "method": "GET"
+            },
+            "resolvedMethod": "GET",
+            "resolvedPath": "/api/v0/sessions"
+          }
+        ],
+        "name": "IoT-SES-SessionsRestApi-dev-heartBeatSession",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs14.x",
+        "vpc": {},
+        "versionLogicalId": "HeartBeatSessionLambdaVersionP6KIZgMqItqovGXojwXmDUAKfUr2WnqMnXwcKY2nRc"
+      }
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless.yml",
+    "initialServerlessConfig": {
+      "service": "IoT-SES-SessionsRestApi",
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      }
+    },
+    "layers": {},
+    "isDashboardMonitoringPreconfigured": false,
+    "artifact": "D:\\4th_year_materials\\myTeamWorks\\khalid\\IOT_expressjs_restAPI-main\\api\\functions\\sessions\\.serverless\\IoT-SES-SessionsRestApi.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/IoT-SES-SessionsRestApi/dev/1688859880097-2023-07-08T23:44:40.097Z",
+    "artifact": "IoT-SES-SessionsRestApi.zip"
+  }
+}

@@ -1,0 +1,62 @@
+
+#------------------Common_configuration(Start)------------------
+#naming the service under lambda on AWS console(application name):
+service: IoT-SES-UsersRestApi
+
+#about provider name & runtime envrinment:
+provider:
+  name: aws
+  region: us-east-1
+  runtime: nodejs14.x
+
+#------------------Common_configuration(End)---------------------
+
+
+#identifying the functions existed on restApi:
+functions:
+  #---------------------------------users-microservice---------------------------------
+  craeteUsers:
+      handler: createUser.handler
+      description: lambda to create a new user!
+      events:
+      - httpApi: 
+          path: /api/v0/users/create
+          method: POST
+
+
+  readUsers:
+    handler: readUser.handler
+    description: lambda to get all usera from database!
+    events:
+    - httpApi: 
+        path: /api/v0/users/read
+        method: GET
+
+  updateUsers:
+    handler: updateUser.handler
+    description: lambda function to update an existing user in database.
+    events:
+    - httpApi:
+        path: /api/v0/users/update
+        method: PUT
+
+  deleteUsers:
+    handler: deleteUser.handler
+    description: lambda function to delete an existing user from the database.
+    events:
+    - httpApi:
+        path: /api/v0/users/delete
+        method: DELETE
+
+
+  
+  #---------------------------------restApi-safety---------------------------------
+
+  #An endpoint to ensure that the restApi is working fine:
+  heartBeats:
+      handler: index.handler
+      description: lambda to ensure that everything is ok!
+      events:
+      - httpApi: 
+          path: /api/v0/users
+          method: GET
