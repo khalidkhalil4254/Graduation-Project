@@ -24,9 +24,6 @@ The project is split into Four parts:
 
 #### Environment Script
 A file named `config.js` in `common` Folder has been prepared as an optional tool to help you configure these variables on your local development environment.
- 
-We do _not_ want your credentials to be stored in git. After pulling this `starter` project, run the following command to tell git to stop tracking the script in git but keep it stored locally. This way, you can use the script for your convenience and reduce risk of exposing your credentials.
-`git rm --cached config.js`
 
 Afterwards, we can prevent the file from being included in your solution by adding the file to our `.gitignore` file.
 
